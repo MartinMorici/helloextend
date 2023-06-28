@@ -1,33 +1,33 @@
 'use client';
 import { HeartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { FormEvent, useRef, useState } from 'react';
-import FavImage from './components/FavImage';
-
+import { FormEvent, useContext, useRef, useState } from 'react';
+import FavImage from '../components/FavImage';
+import { FavContext } from '@/context/favoriteContext';
 
 export default function Home() {
   const searchQuery = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>();
+  const {favorites} = useContext(FavContext)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if(searchQuery.current!.value === ''){
+    if (searchQuery.current!.value === '') {
       return;
     }
 
-    const query = searchQuery.current!.value.toLowerCase()
+    const query = searchQuery.current!.value.toLowerCase();
     const res = await fetch(`https://dog.ceo/api/breed/${query}/images/random/9`);
 
-    if (res.ok){
+    if (res.ok) {
       const data = await res.json();
       setImages(data.message);
-    } else{
-      alert('That breed doesn\'t exists')
+    } else {
+      alert("That breed doesn't exists");
     }
     searchQuery.current!.value = '';
   };
 
- 
   return (
     <main className='flex justify-center items-center pt-8'>
       <div className='max-w-[700px] w-full'>
@@ -43,18 +43,28 @@ export default function Home() {
           </button>
         </form>
         <section className='grid place-items-center grid-cols-3 my-10 gap-y-8'>
+          {!images && <p className='justify-self-start'>Search for a Dog Breed</p>}
           {images?.map((img, index) => {
-            return <FavImage img={img} index={index}></FavImage>
+            return <FavImage img={img} index={index}></FavImage>;
           })}
         </section>
 
         <hr />
 
         <section>
-          <div className='flex gap-4 my-10'>  
-            <HeartIcon className='text-red-500 w-5' /> 
+          <div className='flex gap-4 mt-10'>
+            <HeartIcon className='text-red-500 w-5' />
             <h2 className='text-2xl font-bold'>Favorites</h2>
           </div>
+          {favorites.length === 0 ? (
+            <p className='mt-4'>You have no favorites yet</p>
+          ) : (
+            <section className='grid place-items-center grid-cols-3 my-10 gap-y-8'>
+              {favorites.map((img, index) => {
+                return <FavImage img={img} index={index}></FavImage>;
+              })}
+            </section>
+          )}
         </section>
       </div>
     </main>
